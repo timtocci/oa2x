@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Implicit OAuth2</title>
+    <script src="js/jquery-2.1.4.min.js"></script>
+</head>
+<body>
+<h1>OAuth2 Implicit Token Request</h1>
+<p><a href="http://tools.ietf.org/html/rfc6749#section-1.3.2" target="_blank">Implicit grant type</a> is basically used on the client side where secrets cannot be kept. No server interaction other than the resource (API) owner.</p>
+<h3>This Could be in any domain</h3>
+<p><small> (Its up to the authorize.php on api server to check for a login before showing the authorize form.)</small></p>
+<p><a id="authorize" href="">Authorize</a></p>
+<p id="authmessage">Click to authorize using implicit OAuth2</p>
+<p id="resourcemsg"></p>
+<script type="text/javascript">
+$(function(){
+    var clientId = "testclient";
+    var AuthEndpoint = "http://localhost/oa2x/authorizeimplicit.php";
+    var APIEndpoint = "http://localhost/oa2x/resource.php";
+    var AuthenticationURL = AuthEndpoint +
+            "?response_type=token" +
+            "&client_id=" + clientId +
+            /*"&redirect_uri=" + window.location +  <--OPTIONAL*/
+            "&state=somestatevargoeshere";
+    $("#authorize").attr("href", AuthenticationURL);
+
+    if (document.location.hash !== ""){
+        var token = decodeURI(
+                (RegExp('access_token=' + '(.+?)(&|$)').exec(document.
+                        location.hash)||[,null])[1]
+        );
+        $('#authorize').text("Authorize again");
+        $('#authmessage').text("Your token is: " + token);
+
+        $.ajax({
+            url: APIEndpoint,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization',
+                        "Bearer " + token);
+                xhr.setRequestHeader('Accept',
+                        "application/json");
+            },
+            success: function (response) {
+                if (response) {
+                    $("#resourcemsg")
+                            .text(JSON.stringify(response) );
+                } else {
+                    $('#resourcemsg').text("An error occurred!");
+                }
+            }
+        });
+    }
+})
+</script>
+</body>
+</html>
+
+
