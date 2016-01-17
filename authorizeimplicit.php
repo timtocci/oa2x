@@ -28,7 +28,6 @@ if ($is_authorized) {
     $code = substr($response->getHttpHeader('Location'), strpos($response->getHttpHeader('Location'), 'code=')+5, 40);
     //exit("SUCCESS! Authorization Code: $code");
     // now redirect
-    //http_redirect($code);
     echo $code;
 }
 $response->send();
